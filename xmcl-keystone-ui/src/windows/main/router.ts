@@ -16,6 +16,7 @@ import ResourcePack from '@/views/ResourcePack.vue'
 import Save from '@/views/Save.vue'
 import Setting from '@/views/Setting.vue'
 import ShaderPack from '@/views/ShaderPack.vue'
+import ModAdd from '@/views/ModAdd.vue'
 
 export const createRouter = () => {
   const router = new Router({
@@ -43,6 +44,10 @@ export const createRouter = () => {
       {
         path: '/mod-setting',
         component: Mod,
+      },
+      {
+        path: '/mod-add',
+        component: ModAdd,
       },
       // {
       //   path: '/game-setting',

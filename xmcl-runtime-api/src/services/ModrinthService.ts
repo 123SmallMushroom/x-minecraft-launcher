@@ -29,12 +29,19 @@ export interface InstallModrinthVersionResult {
   dependencies: InstallModrinthVersionResult[]
 }
 
+export interface GetProjectVersionsOptions {
+  projectId: string
+  featured?: boolean
+  gameVersions?: string[]
+  loaders?: string[]
+}
+
 export interface ModrinthService {
   searchProjects(options: SearchProjectOptions): Promise<SearchResult>
 
   getProject(projectId: string): Promise<Project>
 
-  getProjectVersions(options: { projectId: string; featured?: boolean }): Promise<ProjectVersion[]>
+  getProjectVersions(options: GetProjectVersionsOptions): Promise<ProjectVersion[]>
 
   getProjectVersion(versionId: string): Promise<ProjectVersion>
 
