@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col select-none h-full overflow-auto pt-4 pb-0">
+  <div class="flex flex-col select-none h-full overflow-auto pb-0">
     <SharedTooltip />
     <v-progress-linear
       class="absolute top-0 z-10 m-0 p-0 left-0"
@@ -9,8 +9,8 @@
     />
 
     <v-card
-      class="rounded-lg py-1 pr-2 z-5 shadow mx-4"
-      outlined
+      class="z-5 shadow p-2"
+      tile
     >
       <div
         class="flex flex-shrink flex-grow-0 items-center gap-2"
@@ -101,7 +101,7 @@
     </v-card>
 
     <div
-      class="grid h-full overflow-auto grid-cols-12 py-0 divide-x divide-dark-50 "
+      class="h-full overflow-auto grid grid-cols-12 py-0 divide-x divide-dark-50"
       @dragover.prevent
       @drop="onDropToImport"
     >

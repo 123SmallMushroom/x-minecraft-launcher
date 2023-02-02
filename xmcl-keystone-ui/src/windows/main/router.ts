@@ -17,6 +17,8 @@ import Save from '@/views/Save.vue'
 import Setting from '@/views/Setting.vue'
 import ShaderPack from '@/views/ShaderPack.vue'
 import ModAdd from '@/views/ModAdd.vue'
+import User from '@/views/User.vue'
+import VersionLocalView from '@/views/VersionLocalView.vue'
 
 export const createRouter = () => {
   const router = new Router({
@@ -32,6 +34,10 @@ export const createRouter = () => {
       {
         path: '/me',
         component: Me,
+      },
+      {
+        path: '/user',
+        component: User,
       },
       {
         path: '/save',
@@ -82,6 +88,10 @@ export const createRouter = () => {
       {
         path: '/modpack-setting',
         component: Modpack,
+      },
+      {
+        path: '/version-setting',
+        component: VersionLocalView,
       },
       {
         path: '/curseforge/:type',

@@ -1,10 +1,10 @@
 <template>
   <div
-    class="flex flex-col px-8 py-4 overflow-auto w-full gap-4"
+    class="flex flex-col px-4 py-2 overflow-auto w-full gap-4"
     @dragover.prevent
     @drop="onDrop"
   >
-    <user-page-header
+    <UserPageHeader
       :users="users"
       :selected="selectedUser"
       :refreshing="refreshing"
@@ -15,16 +15,16 @@
       @select="onSelect"
       @remove="startDelete"
     />
-    <div class="h-full w-full">
-      <user-microsoft-view
+    <div class="h-full w-full px-4 mt-2">
+      <UserMicrosoftView
         v-if="selectedUser && selectedUser.authService === 'microsoft'"
         :user="selectedUser"
       />
-      <user-mojang-view
+      <UserMojangView
         v-else-if="selectedUser && selectedUser.authService === 'mojang'"
         :user="selectedUser"
       />
-      <user-yggdrasil-view
+      <UserYggdrasilView
         v-else-if="!!selectedUser"
         :user="selectedUser"
       />
@@ -36,7 +36,7 @@
         icon="login"
       />
     </div>
-    <delete-dialog
+    <DeleteDialog
       :title="t('userAccount.removeTitle') "
       :width="550"
       @confirm="confirmRemoveProfile()"
@@ -49,7 +49,7 @@
       <div style="color: grey">
         {{ t('user.id') }}: {{ removingProfile }}
       </div>
-    </delete-dialog>
+    </DeleteDialog>
   </div>
 </template>
 

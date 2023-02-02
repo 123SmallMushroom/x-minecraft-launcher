@@ -1,19 +1,34 @@
 <template>
-  <v-list
-    v-if="!refreshing && versions.length !== 0"
-    color="transparent"
+  <div
+    class="relative"
   >
-    <ErrorView
-      :error="error"
-      @refresh="refresh"
+    <v-progress-linear
+      class="absolute top-0 z-10 m-0 p-0 left-0"
+      :active="refreshing"
+      height="3"
+      :indeterminate="true"
     />
-    <ModrinthProjectVersionsTile
-      v-for="v of versions"
-      :key="v.id"
-      :source="v"
-      @install=""
+    <v-list
+      v-if="!refreshing || versions.length !== 0"
+      color="transparent"
+    >
+      <ErrorView
+        :error="error"
+        @refresh="refresh"
+      />
+      <ModrinthProjectVersionsTile
+        v-for="v of versions"
+        :key="v.id"
+        :source="v"
+        @install=""
+      />
+    </v-list>
+    <v-skeleton-loader
+      v-else
+      class="children:bg-transparent"
+      type="list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line"
     />
-  </v-list>
+  </div>
 </template>
 <script setup lang="ts">
 import ErrorView from '@/components/ErrorView.vue'

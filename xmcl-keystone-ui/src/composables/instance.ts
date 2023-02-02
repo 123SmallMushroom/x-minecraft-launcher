@@ -36,8 +36,6 @@ export function useInstances() {
   const { state } = useService(InstanceServiceKey)
   return {
     instances: computed(() => state.instances),
-    ...useServiceOnly(InstanceServiceKey, 'mountInstance', 'deleteInstance'),
-    ...useServiceOnly(InstanceIOServiceKey, 'importInstance'),
   }
 }
 

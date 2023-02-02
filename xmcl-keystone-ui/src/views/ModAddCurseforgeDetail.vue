@@ -1,25 +1,41 @@
 <template>
-  <v-list
-    v-if="!refreshing && versions.length !== 0"
-    color="transparent"
+  <div
+    class="relative"
   >
-    <ErrorView
-      :error="error"
-      @refresh="refresh"
+    <v-progress-linear
+      class="absolute top-0 z-10 m-0 p-0 left-0"
+      :active="refreshing"
+      height="3"
+      :indeterminate="true"
     />
-    <CurseforgeProjectFileItem
-      v-for="file in versions"
-      :id="file.id"
-      :key="file.id"
-      :mod-id="modId"
-      :name="file.fileName"
-      :loader="file.gameVersions.find(v => !Number.isInteger(Number(v[0])))"
-      :versions="file.gameVersions.filter(v => Number.isInteger(Number(v[0])))"
-      :size="file.fileLength"
-      :date="file.fileDate"
-      :release-type="file.releaseType"
+
+    <v-list
+      v-if="!refreshing || versions.length !== 0"
+      color="transparent"
+    >
+      <ErrorView
+        :error="error"
+        @refresh="refresh"
+      />
+      <CurseforgeProjectFileItem
+        v-for="file in versions"
+        :id="file.id"
+        :key="file.id"
+        :mod-id="modId"
+        :name="file.fileName"
+        :loader="file.gameVersions.find(v => !Number.isInteger(Number(v[0])))"
+        :versions="file.gameVersions.filter(v => Number.isInteger(Number(v[0])))"
+        :size="file.fileLength"
+        :date="file.fileDate"
+        :release-type="file.releaseType"
+      />
+    </v-list>
+    <v-skeleton-loader
+      v-else
+      class="children:bg-transparent"
+      type="list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line"
     />
-  </v-list>
+  </div>
 </template>
 <script setup lang="ts">
 import ErrorView from '@/components/ErrorView.vue'
