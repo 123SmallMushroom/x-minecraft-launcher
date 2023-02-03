@@ -88,7 +88,7 @@ export function useModsSearch(keyword: Ref<string>, minecraft: Ref<string>, forg
     }).finally(() => {
       loadingCurseforge.value = false
     })
-  }, 500)
+  }, 1000)
 
   watch(keyword, onSearch)
 

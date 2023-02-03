@@ -9,41 +9,81 @@
     />
 
     <v-card
-      class="z-5 shadow p-2"
-      tile
+      class="z-5 shadow m-4 rounded-lg"
+      outlined
     >
       <div
-        class="flex flex-shrink flex-grow-0 items-center gap-2"
+        class="flex flex-shrink flex-grow-0 items-baseline gap-2 mb-4 p-3"
       >
-        <v-text-field
-          v-model="keyword"
-          filled
-          dense
-          class="pl-2 pt-2 max-w-200 max-h-full"
-          :label="t('mod.filter')"
-          :loading="loading"
-        />
         <v-select
+          filled
+          prepend-inner-icon="search"
+          :items="projectTypes"
+          dense
+          :label="t('filter')"
           class="max-w-40"
           hide-details
-          label="Minecraft"
-          flat
-          solo
-          clearable
         />
-        <div class="flex-grow" />
+        <v-text-field
+          v-model="keyword"
+          prepend-inner-icon="search"
+          filled
+          dense
+          hide-details
+          :label="t('curseforge.search')"
+          :loading="loading"
+        />
+        <AvatarChip
+          v-if="minecraft"
+          :avatar="'image://builtin/minecraft'"
+          :text="'Minecraft ' + minecraft"
+        />
+        <AvatarChip
+          v-if="forge"
+          :avatar="'image://builtin/forge'"
+          :text="'Forge ' + forge"
+        />
+        <AvatarChip
+          v-if="fabricLoader"
+          :avatar="'image://builtin/fabric'"
+          :text="'Fabric ' + fabricLoader"
+        />
+        <AvatarChip
+          v-if="quiltLoader"
+          :avatar="'image://builtin/quilt'"
+          :text="'Quilt ' + quiltLoader"
+        />
 
-        <v-btn icon>
-          <v-icon>
-            shopping_cart
-          </v-icon>
-        </v-btn>
-        <v-btn color="primary">
-          <v-icon left>
-            file_download
-          </v-icon>
-          Install
-        </v-btn>
+        <div class="flex-grow" />
+        <v-menu offset-y>
+          <template #activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+            >
+              <v-icon>
+                shopping_cart
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-sheet
+            color="black"
+            class="p-2"
+          >
+            <div class="flex">
+              <v-btn text>
+                Pending
+              </v-btn>
+              <div class="flex-grow" />
+            </div>
+
+            <v-list class="overflow-auto max-h-100 rounded-lg">
+              <v-list-item>
+                <v-list-item-title>123123</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-sheet>
+        </v-menu>
       </div>
       <div
         class="flex flex-shrink flex-grow-0 items-center justify-center gap-2"
@@ -105,16 +145,16 @@
       @dragover.prevent
       @drop="onDropToImport"
     >
-      <v-list
-        color="transparent"
-        class="lg:col-span-7 col-span-5 h-full visible-scroll overflow-auto"
+      <v-virtual-scroll
+        :bench="2"
+        class="lg:col-span-7 col-span-5 h-full max-h-full visible-scroll overflow-auto mx-2"
+        :items="items"
+        item-height="68"
       >
-        <v-list-item-group
-          v-model="selectedItem"
-        >
+        <template #default="{ item: p }">
           <v-list-item
-            v-for="p of items"
-            :key="p.id"
+            link
+            @click="onSelect(p)"
           >
             <v-list-item-avatar>
               <v-img
@@ -125,9 +165,18 @@
               <v-list-item-title>{{ p.title }}</v-list-item-title>
               <v-list-item-subtitle>{{ p.description }}</v-list-item-subtitle>
             </v-list-item-content>
+            <v-list-item-action>
+              <v-avatar
+                size="30px"
+              >
+                <v-icon>
+                  {{ p.modrinth ? '$vuetify.icons.modrinth' : p.curseforge ? '$vuetify.icons.curseforge' : 'folder' }}
+                </v-icon>
+              </v-avatar>
+            </v-list-item-action>
           </v-list-item>
-        </v-list-item-group>
-      </v-list>
+        </template>
+      </v-virtual-scroll>
       <div class="h-full overflow-auto lg:col-span-5 col-span-7">
         <template v-if="!!selected">
           <ModAddModrinthDetail
@@ -142,41 +191,15 @@
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
           />
+          <ModAddResourceDetail
+            v-else-if="selected.resource"
+            :resources="selected.resource"
+            :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
+            :minecraft="minecraft"
+            @install="onInstallResource"
+          />
         </template>
       </div>
-
-      <!-- <Hint
-        v-else-if="items.length === 0"
-        icon="save_alt"
-        :text="t('mod.dropHint')"
-        :absolute="true"
-        class="h-full z-0"
-      /> -->
-      <!-- <v-virtual-scroll
-        v-else
-        :class="{ 'selection-mode': isSelectionMode }"
-        :items="items"
-        :bench="2"
-        class="overflow-auto max-h-full"
-        item-height="100"
-      >
-        <template #default="{ item, index }">
-          <div class="mx-8 invisible-scroll last:mb-4">
-            <ModCard
-              :key="item.path + '@' + item.hash"
-              :item="item"
-              :index="index"
-              :selection="isSelectionMode"
-              :on-enable="onEnable"
-              :on-tags="onTags"
-              :on-select="onSelect"
-              :on-item-dragstart="onItemDragstart"
-              :on-click="onClick"
-              :on-delete="startDelete"
-            />
-          </div>
-        </template>
-      </v-virtual-scroll> -->
     </div>
     <div class="absolute w-full left-0 bottom-0 flex items-center justify-center mb-5 pointer-events-none">
       <!-- <FloatButton
@@ -216,6 +239,8 @@ import { Project, SearchResultHit } from '@xmcl/modrinth'
 import ModAddModrinthDetail from './ModAddModrinthDetail.vue'
 import { useInstanceVersionBase } from '@/composables/instance'
 import ModAddCurseforgeDetail from './ModAddCurseforgeDetail.vue'
+import ModAddResourceDetail from './ModAddResourceDetail.vue'
+import AvatarChip from '@/components/AvatarChip.vue'
 
 interface SearchItem {
   id: string
@@ -225,14 +250,13 @@ interface SearchItem {
 
   curseforge?: Mod
   modrinth?: SearchResultHit
-  resource?: Resource
+  resource?: Resource[]
 }
 
-const selectedItem = ref(undefined)
 const { importResources } = useService(ResourceServiceKey)
 const tab = ref(0)
 const keyword = ref('')
-const { minecraft, forge, fabricLoader } = useInstanceVersionBase()
+const { minecraft, forge, fabricLoader, quiltLoader } = useInstanceVersionBase()
 const {
   modrinth, modrinthError, loadingModrinth,
   curseforge, curseforgeError, loadingCurseforge,
@@ -243,6 +267,18 @@ const curseforgeCount = computed(() => curseforge.value ? curseforge.value.pagin
 const modrinthCount = computed(() => modrinth.value ? modrinth.value.total_hits : 0)
 const disableModrinth = computed(() => tab.value !== 0 && tab.value !== 3)
 const disableCurseforge = computed(() => tab.value !== 0 && tab.value !== 2)
+const disableLocal = computed(() => tab.value !== 0 && tab.value !== 1)
+
+const projectTypes = computed(() => [{
+  value: 'mod',
+  text: t('modrinth.projectType.mod'),
+}, {
+  value: 'resourcepack',
+  text: t('modrinth.projectType.resourcePack'),
+}, {
+  value: 'shader',
+  text: t('modrinth.projectType.shader'),
+}])
 
 const items = computed(() => {
   const results: [SearchItem, number][] = []
@@ -270,34 +306,46 @@ const items = computed(() => {
       }, getDiceCoefficient(keyword.value, i.name)]))
     }
   }
-  for (const m of mods.value) {
-    let description = ''
-    if (m.metadata.forge) {
-      description = m.metadata.forge.description
-    } else if (m.metadata.fabric) {
-      if (m.metadata.fabric instanceof Array) {
-        description = m.metadata.fabric[0].description || ''
+  if (!disableLocal.value) {
+    const dict: Record<string, SearchItem> = {}
+    for (const m of mods.value) {
+      let description = ''
+      let name = ''
+      if (m.metadata.forge) {
+        description = m.metadata.forge.description
+        name = m.metadata.forge.name
+      } else if (m.metadata.fabric) {
+        if (m.metadata.fabric instanceof Array) {
+          description = m.metadata.fabric[0].description || ''
+          name = m.metadata.fabric[0].name || m.metadata.fabric[0].id || ''
+        } else {
+          description = m.metadata.fabric.description || ''
+          name = m.metadata.fabric.name || m.metadata.fabric.id || ''
+        }
+      }
+      if (!dict[name]) {
+        dict[name] = {
+          id: m.path,
+          icon: m.icons?.[0] ?? '',
+          title: name,
+          description: description,
+          resource: [m],
+        }
+        results.push(([dict[name], getDiceCoefficient(keyword.value, m.name)]))
       } else {
-        description = m.metadata.fabric.description || ''
+        dict[name].resource?.push(m)
       }
     }
-    results.push(([{
-      id: m.path,
-      icon: m.icons?.[0] ?? '',
-      title: m.name,
-      description: description,
-      resource: m,
-    }, getDiceCoefficient(keyword.value, m.name)]))
   }
+
   results.sort((a, b) => -a[1] + b[1])
   return results.map(v => v[0])
 })
 
-const selected = computed(() => {
-  const index = selectedItem.value
-  if (index !== undefined) return items.value[index]
-  return undefined
-})
+const selected = ref(undefined as undefined | SearchItem)
+const onSelect = (i: SearchItem) => {
+  selected.value = i
+}
 
 provide(kSharedTooltip, useSharedTooltip<CompatibleDetail>((dep) => {
   const compatibleText = dep.compatible === 'maybe'
@@ -307,6 +355,10 @@ provide(kSharedTooltip, useSharedTooltip<CompatibleDetail>((dep) => {
       : t('mod.incompatible')
   return compatibleText + t('mod.acceptVersion', { version: dep.requirements }) + ', ' + t('mod.currentVersion', { current: dep.version || '⭕' }) + '.'
 }))
+
+const onInstallResource = (r: Resource) => {
+  
+}
 
 const { t } = useI18n()
 

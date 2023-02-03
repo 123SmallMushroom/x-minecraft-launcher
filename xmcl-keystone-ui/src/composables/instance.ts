@@ -52,11 +52,13 @@ export function useInstanceVersionBase() {
   const minecraft = computed(() => state.instance.runtime.minecraft)
   const forge = computed(() => state.instance.runtime.forge)
   const fabricLoader = computed(() => state.instance.runtime.fabricLoader)
+  const quiltLoader = computed(() => state.instance.runtime.quiltLoader)
   const yarn = computed(() => state.instance.runtime.yarn)
   return {
     minecraft,
     forge,
     fabricLoader,
+    quiltLoader,
     yarn,
   }
 }

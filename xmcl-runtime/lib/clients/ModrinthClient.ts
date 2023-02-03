@@ -24,7 +24,7 @@ export class ModrinthClient {
       query,
       dispatcher: this.dispatcher,
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
       signal,
     })
@@ -40,7 +40,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
     })
     const project: Project = await response.body.json()
@@ -62,7 +62,7 @@ export class ModrinthClient {
       query,
       dispatcher: this.dispatcher,
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
       signal,
     })
@@ -80,7 +80,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
     })
     const version: ProjectVersion = await response.body.json()
@@ -93,7 +93,7 @@ export class ModrinthClient {
         ids: JSON.stringify(ids),
       },
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
       dispatcher: this.dispatcher,
       signal,
@@ -111,7 +111,7 @@ export class ModrinthClient {
         algorithm: 'sha1',
       }),
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
         'content-type': 'application/json',
       },
       signal,
@@ -147,7 +147,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=86400',
+        // 'cache-control': 'max-stale=86400',
       },
     })
     const result: License[] = await response.body.json()
@@ -159,7 +159,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=86400',
+        // 'cache-control': 'max-stale=86400',
       },
     })
     const result: Category[] = await response.body.json()
@@ -171,7 +171,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=86400',
+        // 'cache-control': 'max-stale=86400',
       },
     })
     const result: GameVersion[] = await response.body.json()
@@ -183,7 +183,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=86400',
+        // 'cache-control': 'max-stale=86400',
       },
     })
     const result: Loader[] = await response.body.json()
@@ -195,7 +195,7 @@ export class ModrinthClient {
       dispatcher: this.dispatcher,
       signal,
       headers: {
-        'cache-control': 'max-stale=3600',
+        // 'cache-control': 'max-stale=3600',
       },
     })
     const result: TeamMember[] = await response.body.json()
