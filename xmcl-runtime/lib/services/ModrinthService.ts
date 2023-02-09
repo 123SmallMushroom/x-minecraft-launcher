@@ -119,6 +119,7 @@ export class ModrinthService extends AbstractService implements IModrinthService
       }
       visited.add(version.project_id)
 
+      this.client.getProjectVersionsById(version.dependencies.map(d => d.version_id).filter(isNonnull))
       const deps = await Promise.all(version.dependencies.map(async (dep) => {
         if (dep.dependency_type === 'required') {
           if (dep.version_id) {

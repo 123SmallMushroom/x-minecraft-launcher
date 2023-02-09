@@ -47,6 +47,7 @@ const props = defineProps<{
 const { getProjectVersions } = useService(ModrinthServiceKey)
 const versions = ref([] as ProjectVersion[])
 const projectId = computed(() => props.hint.project_id)
+const emit = defineEmits(['install'])
 const getMajor = (v: string) => {
   const split = v.split('.')
   if (split.length > 1) {

@@ -1,10 +1,9 @@
 import { FileModLoaderType, Mod, ModsSearchSortField, Pagination } from '@xmcl/curseforge'
 import { SearchResult } from '@xmcl/modrinth'
-import { CurseForgeServiceKey, InstanceServiceKey, ModrinthServiceKey, Resource } from '@xmcl/runtime-api'
+import { CurseForgeServiceKey, ModrinthServiceKey, Resource } from '@xmcl/runtime-api'
 import { filter } from 'fuzzy'
 import debounce from 'lodash.debounce'
 import { Ref } from 'vue'
-import { useInstanceVersionBase } from './instance'
 import { kMods, useMods } from './mods'
 import { useService } from './service'
 

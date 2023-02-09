@@ -52,6 +52,8 @@ export interface ModrinthService {
   getTags(): Promise<{ licenses: License[]; categories: Category[]; gameVersions: GameVersion[]; modLoaders: Loader[]; environments: string[] }>
 
   installVersion(options: InstallProjectVersionOptions): Promise<InstallModrinthVersionResult>
+
+  resolveDependencies(version: ProjectVersion): Promise<ProjectVersion[]>
 }
 
 export const ModrinthServiceKey: ServiceKey<ModrinthService> = 'ModrinthService'

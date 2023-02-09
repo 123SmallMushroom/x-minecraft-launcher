@@ -55,6 +55,7 @@ const props = defineProps<{
 const { getModFiles } = useService(CurseForgeServiceKey)
 const versions = ref([] as File[])
 const modId = computed(() => props.mod.id)
+const emit = defineEmits(['install'])
 const getMajor = (v: string) => {
   const split = v.split('.')
   if (split.length > 1) {

@@ -15,22 +15,12 @@
       <div
         class="flex flex-shrink flex-grow-0 items-baseline gap-2 mb-4 p-3"
       >
-        <v-select
-          filled
-          prepend-inner-icon="search"
-          :items="projectTypes"
-          dense
-          :label="t('filter')"
-          class="max-w-40"
-          hide-details
-        />
         <v-text-field
           v-model="keyword"
           prepend-inner-icon="search"
           filled
           dense
           hide-details
-          :label="t('curseforge.search')"
           :loading="loading"
         />
         <AvatarChip
@@ -184,12 +174,14 @@
             :hint="selected.modrinth"
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
+            @install="onInstallModrinth"
           />
           <ModAddCurseforgeDetail
             v-else-if="selected.curseforge"
             :mod="selected.curseforge"
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
+            @install="onInstallCurseforge"
           />
           <ModAddResourceDetail
             v-else-if="selected.resource"
@@ -201,48 +193,26 @@
         </template>
       </div>
     </div>
-    <div class="absolute w-full left-0 bottom-0 flex items-center justify-center mb-5 pointer-events-none">
-      <!-- <FloatButton
-        class="pointer-events-auto"
-        :deleting="isDraggingMod"
-        :visible="isDraggingMod || isModified"
-        :loading="committing"
-        @drop="startDelete()"
-        @click="commit"
-      /> -->
-    </div>
   </div>
 </template>
 
 <script lang=ts setup>
-import Hint from '@/components/Hint.vue'
-import RefreshingTile from '@/components/RefreshingTile.vue'
+import AvatarChip from '@/components/AvatarChip.vue'
 import { useDrop, useService } from '@/composables'
-import { useModDeletion } from '@/composables/modDelete'
-import { useModDragging } from '@/composables/modDraggable'
-import { useModFilter } from '@/composables/modFilter'
-import { useModSelection } from '@/composables/modSelection'
-import { kSharedTooltip, useSharedTooltip } from '@/composables/sharedTooltip'
-import { Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
-import DeleteDialog from '../components/DeleteDialog.vue'
-import { ModItem, useInstanceMods } from '../composables/mod'
-import ModCard from './ModCard.vue'
-import ModDeleteView from './ModDeleteView.vue'
-import FloatButton from './ModFloatButton.vue'
-import ModHeader from './ModHeader.vue'
-import SharedTooltip from '../components/SharedTooltip.vue'
-import { CompatibleDetail } from '@/util/modCompatible'
+import { useInstanceVersionBase } from '@/composables/instance'
 import { useModsSearch } from '@/composables/modSearch'
+import { kSharedTooltip, useSharedTooltip } from '@/composables/sharedTooltip'
+import { CompatibleDetail } from '@/util/modCompatible'
 import { getDiceCoefficient } from '@/util/sort'
 import { Mod } from '@xmcl/curseforge'
 import { Project, SearchResultHit } from '@xmcl/modrinth'
-import ModAddModrinthDetail from './ModAddModrinthDetail.vue'
-import { useInstanceVersionBase } from '@/composables/instance'
+import { Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
+import SharedTooltip from '../components/SharedTooltip.vue'
 import ModAddCurseforgeDetail from './ModAddCurseforgeDetail.vue'
+import ModAddModrinthDetail from './ModAddModrinthDetail.vue'
 import ModAddResourceDetail from './ModAddResourceDetail.vue'
-import AvatarChip from '@/components/AvatarChip.vue'
 
-interface SearchItem {
+interface ModListItem {
   id: string
   icon: string
   title: string
@@ -257,6 +227,7 @@ const { importResources } = useService(ResourceServiceKey)
 const tab = ref(0)
 const keyword = ref('')
 const { minecraft, forge, fabricLoader, quiltLoader } = useInstanceVersionBase()
+
 const {
   modrinth, modrinthError, loadingModrinth,
   curseforge, curseforgeError, loadingCurseforge,
@@ -269,19 +240,8 @@ const disableModrinth = computed(() => tab.value !== 0 && tab.value !== 3)
 const disableCurseforge = computed(() => tab.value !== 0 && tab.value !== 2)
 const disableLocal = computed(() => tab.value !== 0 && tab.value !== 1)
 
-const projectTypes = computed(() => [{
-  value: 'mod',
-  text: t('modrinth.projectType.mod'),
-}, {
-  value: 'resourcepack',
-  text: t('modrinth.projectType.resourcePack'),
-}, {
-  value: 'shader',
-  text: t('modrinth.projectType.shader'),
-}])
-
 const items = computed(() => {
-  const results: [SearchItem, number][] = []
+  const results: [ModListItem, number][] = []
   const modr = modrinth.value
   if (modr && !disableModrinth.value) {
     for (const i of modr.hits) {
@@ -307,7 +267,7 @@ const items = computed(() => {
     }
   }
   if (!disableLocal.value) {
-    const dict: Record<string, SearchItem> = {}
+    const dict: Record<string, ModListItem> = {}
     for (const m of mods.value) {
       let description = ''
       let name = ''
@@ -342,8 +302,8 @@ const items = computed(() => {
   return results.map(v => v[0])
 })
 
-const selected = ref(undefined as undefined | SearchItem)
-const onSelect = (i: SearchItem) => {
+const selected = ref(undefined as undefined | ModListItem)
+const onSelect = (i: ModListItem) => {
   selected.value = i
 }
 
@@ -356,8 +316,16 @@ provide(kSharedTooltip, useSharedTooltip<CompatibleDetail>((dep) => {
   return compatibleText + t('mod.acceptVersion', { version: dep.requirements }) + ', ' + t('mod.currentVersion', { current: dep.version || '⭕' }) + '.'
 }))
 
-const onInstallResource = (r: Resource) => {
-  
+const onInstallResource = (resource: Resource) => {
+
+}
+
+const onInstallCurseforge = (mod: Mod) => {
+
+}
+
+const onInstallModrinth = (project: Project) => {
+
 }
 
 const { t } = useI18n()
