@@ -226,8 +226,6 @@ export interface UserService extends StatefulService<UserState>, GenericEventEmi
   setUserProfile(userProfile: UserProfile): Promise<void>
   /**
    * Get all supported account systems.
-   *
-   * This might be influenced by locale regions .
    */
   getSupportedAccountSystems(): Promise<string[]>
   /**
