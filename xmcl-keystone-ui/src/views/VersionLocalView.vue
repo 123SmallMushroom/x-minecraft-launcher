@@ -180,6 +180,7 @@
 import { InstallServiceKey, LocalVersionHeader, versionCompare, VersionServiceKey } from '@xmcl/runtime-api'
 import { useLocalVersions } from '../composables/version'
 import { useRefreshable, useService } from '@/composables'
+import { usePresence } from '@/composables/presence'
 
 const props = withDefaults(defineProps<{
   value?: LocalVersionHeader
@@ -245,6 +246,7 @@ const { refresh, refreshing } = useRefreshable(async () => {
   await refreshVersions()
 })
 
+usePresence({ location: 'versions' })
 </script>
 
 <style>

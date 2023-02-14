@@ -89,7 +89,7 @@ import { useModDragging } from '@/composables/modDraggable'
 import { useModFilter } from '@/composables/modFilter'
 import { useModSelection } from '@/composables/modSelection'
 import { kSharedTooltip, useSharedTooltip } from '@/composables/sharedTooltip'
-import { ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
+import { InstanceServiceKey, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
 import DeleteDialog from '../components/DeleteDialog.vue'
 import { ModItem, useInstanceMods } from '../composables/mod'
 import ModCard from './ModCard.vue'
@@ -98,6 +98,8 @@ import FloatButton from './ModFloatButton.vue'
 import ModHeader from './ModHeader.vue'
 import SharedTooltip from '../components/SharedTooltip.vue'
 import { CompatibleDetail } from '@/util/modCompatible'
+import { usePresence } from '@/composables/presence'
+
 const { importResources } = useService(ResourceServiceKey)
 const { items: mods, commit, committing, isModified, enabledModCounts } = useInstanceMods()
 const loading = false
@@ -134,4 +136,6 @@ const onTags = (item: ModItem, tags: string[]) => {
 const onSelect = () => {
   isSelectionMode.value = true
 }
+const { state } = useService(InstanceServiceKey)
+usePresence({ location: 'instance-mods', instance: state.instance.name })
 </script>

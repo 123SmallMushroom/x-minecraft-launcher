@@ -67,6 +67,7 @@ import { useBusy, useOperation, useService } from '@/composables'
 import { kDropService } from '@/composables/dropService'
 import { injection } from '@/util/inject'
 import Hint from '@/components/Hint.vue'
+import { usePresence } from '@/composables/presence'
 
 const { refreshUser: refreshAccount } = useService(UserServiceKey)
 const { handleUrl } = useService(BaseServiceKey)
@@ -79,7 +80,7 @@ const { state, selectUser, removeUserProfile, abortRefresh } = useService(UserSe
 const userId = computed(() => state.selectedUser.id)
 const selectedUser = computed(() => users.value.find(u => u.id === userId.value))
 
-const isExpired = computed(() => !selectedUser.value?.accessToken || selectedUser.value.expiredAt < Date.now())
+const isExpired = computed(() => !selectedUser.value?.invalidated || selectedUser.value.expiredAt < Date.now())
 
 const { begin: beginRemoveProfile, operate: confirmRemoveProfile, data: removingProfile } = useOperation('', (v) => removeUserProfile(v))
 
@@ -128,6 +129,9 @@ function onDrop(e: DragEvent) {
 function onSelect(user: UserProfile) {
   selectUser(user.id)
 }
+
+usePresence({ location: 'user' })
+
 </script>
 
 <style>

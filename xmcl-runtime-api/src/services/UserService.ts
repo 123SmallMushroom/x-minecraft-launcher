@@ -98,10 +98,6 @@ export class UserState implements UserSchema {
     return user?.profiles[user.selectedProfile]
   }
 
-  get isAccessTokenValid(): boolean {
-    return this.user?.accessToken !== ''
-  }
-
   get offline(): boolean {
     return this.user?.authService === 'offline'
   }
@@ -139,12 +135,6 @@ export class UserState implements UserSchema {
     }
   }
 
-  userInvalidate() {
-    if (this.users[this.selectedUser.id].authService !== 'offline') {
-      this.users[this.selectedUser.id].accessToken = ''
-    }
-  }
-
   userProfileRemove(userId: string) {
     if (this.selectedUser.id === userId) {
       this.selectedUser.id = ''
@@ -155,7 +145,6 @@ export class UserState implements UserSchema {
   userProfile(user: UserProfile) {
     if (this.users[user.id]) {
       const current = this.users[user.id]
-      current.accessToken = user.accessToken
       current.avatar = user.avatar
       current.expiredAt = user.expiredAt
       current.profiles = user.profiles

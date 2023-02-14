@@ -2,6 +2,7 @@ import { OfflineUserService as IOfflineUserService, OfflineUserServiceKey, UserP
 import { offline } from '@xmcl/user'
 import LauncherApp from '../app/LauncherApp'
 import { LauncherAppKey } from '../app/utils'
+import { kUserTokenStorage, UserTokenStorage } from '../entities/userTokenStore'
 import { ImageStorage } from '../util/imageStore'
 import { Inject } from '../util/objectRegistry'
 import { AbstractService, ExposeServiceKey } from './Service'
@@ -14,6 +15,7 @@ export class OfflineUserService extends AbstractService implements IOfflineUserS
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(ImageStorage) readonly imageStore: ImageStorage,
     @Inject(UserService) private userService: UserService,
+    @Inject(kUserTokenStorage) private userTokenStorage: UserTokenStorage,
   ) {
     super(app, async () => {
       await userService.initialize()
@@ -47,15 +49,18 @@ export class OfflineUserService extends AbstractService implements IOfflineUserS
               },
             }
           }
+
           const profile: UserProfile = {
             id: OFFLINE_USER_ID,
-            accessToken: existed?.accessToken ?? auth.accessToken,
+            invalidated: false,
             selectedProfile: auth.selectedProfile.id,
             profiles: profiles,
             expiredAt: Number.MAX_SAFE_INTEGER / 100 * 95,
             authService: 'offline',
             username: OFFLINE_USER_ID,
           }
+          await userTokenStorage.put(profile, auth.accessToken)
+
           return profile
         },
         async setSkin(p, gameProfile, { skin, cape }) {
