@@ -6,15 +6,23 @@ import { useService } from './service'
 
 export interface ModListFileItem {
   id: string
+  mutex: string
   name: string
 
   curseforge?: File
   modrinth?: ProjectVersion
   resource?: Resource
 
-  parent: ['none'] | ['required', string] | ['optional', string] | ['incompatible', string] | ['embedded', string]
+  dependencies: ModListFileLeaveItem[]
+  embedded: Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'>[]
+  incompatible: Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'>[]
 
-  skip: boolean
+  disabled: boolean
+}
+
+export type ModListFileLeaveItem = Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'> & {
+  type: 'required' | 'optional'
+  parent: ModListFileItem
 }
 
 export const kModInstallList = Symbol('ModInstallList') as InjectionKey<ReturnType<typeof useModInstallList>>
@@ -22,7 +30,7 @@ export const kModInstallList = Symbol('ModInstallList') as InjectionKey<ReturnTy
 export function useModInstallList() {
   const list = ref([] as ModListFileItem[])
 
-  async function add(item: File | ProjectVersion | Resource) {
+  async function add(item: File | ProjectVersion | Resource, icon?: string) {
     const id = 'path' in item ? item.path : 'project_id' in item ? item.id : item.id.toString()
     const name = 'path' in item ? item.fileName : 'project_id' in item ? item.name : item.displayName.toString()
     const curseforge = 'modId' in item ? item : undefined
@@ -30,69 +38,101 @@ export function useModInstallList() {
     const resource = 'path' in item ? item : undefined
     const result: ModListFileItem = {
       id,
+      mutex: '',
       name,
-      parent: ['none'],
-      skip: false,
+
       curseforge,
       modrinth,
       resource,
+
+      disabled: false,
+      dependencies: [],
     }
-    list.value.push(result, ...await refreshDependencies(result))
+    await refreshDependencies(result)
+    const previous = list.value
+    // const match = (a: ModListFileItem, b: ModListFileItem) => {
+    //   return false
+    // }
+    for (const i of previous) {
+      // if (!i.disabled && i.mutex === ) {
+      // }
+      // const incompatible = previous.filter(p => match(p, i)
+      //   && !(i.type === 'incompatible' && p.type === 'incompatible')
+      //   && !i.disabled && !p.disabled
+      // )
+      // i.incompatbile = incompatible
+      // for (const p of incompatible) {
+      //   p.incompatbile = [i]
+      // }
+    }
+    list.value.push(result)
   }
 
   function remove(item: string) {
     list.value = list.value.filter(i => i.id !== item)
   }
 
+  function enable(item: ModListFileItem) {
+    // if (!item.disabled) return
+    // if (item.type === 'embedded') return
+    // if (item.type === 'incompatible') return
+
+    // item.disabled = false
+  }
+
   const { resolveFileDependencies: resolveCurseforge } = useService(CurseForgeServiceKey)
   const { resolveDependencies: resolveModrinth } = useService(ModrinthServiceKey)
 
-  async function refreshDependencies(item: ModListFileItem) {
-    const list = [] as ModListFileItem[]
-    if (item.curseforge) {
-      const result = await resolveCurseforge(item.curseforge)
+  async function refreshDependencies(parent: ModListFileItem) {
+    if (parent.curseforge) {
+      const result = await resolveCurseforge(parent.curseforge)
       for (const [file, type] of result) {
-        const item: ModListFileItem = {
+        const depType = type === FileRelationType.RequiredDependency
+          ? 'required'
+          : type === FileRelationType.OptionalDependency || type === FileRelationType.Tool
+            ? 'optional'
+            : type === FileRelationType.Incompatible
+              ? 'incompatible'
+              : 'embedded'
+        parent.dependencies.push({
           id: file.id.toString(),
           name: file.displayName,
           curseforge: file,
-          parent: type === FileRelationType.RequiredDependency
-            ? ['required', file.id.toString()]
-            : type === FileRelationType.OptionalDependency
-              ? ['optional', file.id.toString()]
-              : type === FileRelationType.Incompatible
-                ? ['incompatible', file.id.toString()]
-                : type === FileRelationType.EmbeddedLibrary || type === FileRelationType.Include
-                  ? ['embedded', file.id.toString()]
-                  : ['none'],
-          skip: false,
-        }
-        list.push(item)
+          parent,
+          type: depType,
+          disabled: depType !== 'required',
+          mutex: '',
+        })
       }
-    } else if (item.modrinth) {
-      const result = await resolveModrinth(item.modrinth)
-      const deps = item.modrinth.dependencies
+    } else if (parent.modrinth) {
+      const result = await resolveModrinth(parent.modrinth)
+      const deps = parent.modrinth.dependencies
       for (const v of result) {
         const dep = deps.find(d => d.version_id === v.id && d.project_id === v.project_id)
         if (!dep) {
           continue
         }
-        const item: ModListFileItem = {
+        parent.dependencies.push({
           id: v.id.toString(),
           name: v.name,
           modrinth: v,
-          parent: [dep.dependency_type, v.id.toString()],
-          skip: false,
-        }
-        list.push(item)
+          parent,
+          type: dep.dependency_type,
+          disabled: dep.dependency_type !== 'required',
+          mutex: '',
+        })
       }
     }
-    return list
+  }
+
+  async function commit() {
+    // list.value.filter(i => i.)
   }
 
   return {
     list,
     add,
     remove,
+    commit,
   }
 }

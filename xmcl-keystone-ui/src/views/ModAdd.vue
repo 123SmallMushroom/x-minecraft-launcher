@@ -174,21 +174,21 @@
             :hint="selected.modrinth"
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
-            @install="onInstallModrinth"
+            @install="onInstallModrinth($event, selected)"
           />
           <ModAddCurseforgeDetail
             v-else-if="selected.curseforge"
             :mod="selected.curseforge"
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
-            @install="onInstallCurseforge"
+            @install="onInstallCurseforge($event, selected)"
           />
           <ModAddResourceDetail
             v-else-if="selected.resource"
             :resources="selected.resource"
             :loader="forge ? 'forge' : fabricLoader ? 'fabric' : ''"
             :minecraft="minecraft"
-            @install="onInstallResource"
+            @install="onInstallResource($event, selected)"
           />
         </template>
       </div>
@@ -200,12 +200,14 @@
 import AvatarChip from '@/components/AvatarChip.vue'
 import { useDrop, useService } from '@/composables'
 import { useInstanceVersionBase } from '@/composables/instance'
+import { kModInstallList } from '@/composables/modInstallList'
 import { useModsSearch } from '@/composables/modSearch'
 import { kSharedTooltip, useSharedTooltip } from '@/composables/sharedTooltip'
+import { injection } from '@/util/inject'
 import { CompatibleDetail } from '@/util/modCompatible'
 import { getDiceCoefficient } from '@/util/sort'
-import { Mod } from '@xmcl/curseforge'
-import { Project, SearchResultHit } from '@xmcl/modrinth'
+import { Mod, File } from '@xmcl/curseforge'
+import { Project, ProjectVersion, SearchResultHit } from '@xmcl/modrinth'
 import { Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
 import SharedTooltip from '../components/SharedTooltip.vue'
 import ModAddCurseforgeDetail from './ModAddCurseforgeDetail.vue'
@@ -316,16 +318,18 @@ provide(kSharedTooltip, useSharedTooltip<CompatibleDetail>((dep) => {
   return compatibleText + t('mod.acceptVersion', { version: dep.requirements }) + ', ' + t('mod.currentVersion', { current: dep.version || '⭕' }) + '.'
 }))
 
-const onInstallResource = (resource: Resource) => {
+const { add } = injection(kModInstallList)
 
+const onInstallResource = (resource: Resource, item: ModListItem) => {
+  add(resource, item.icon)
 }
 
-const onInstallCurseforge = (mod: Mod) => {
-
+const onInstallCurseforge = (mod: File, item: ModListItem) => {
+  add(mod, item.icon)
 }
 
-const onInstallModrinth = (project: Project) => {
-
+const onInstallModrinth = (project: ProjectVersion, item: ModListItem) => {
+  add(project, item.icon)
 }
 
 const { t } = useI18n()
