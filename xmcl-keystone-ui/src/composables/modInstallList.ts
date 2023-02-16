@@ -1,26 +1,39 @@
+import { injection } from '@/util/inject'
+import { getModDependencies } from '@/util/modDependencies'
 import { File, FileRelationType } from '@xmcl/curseforge'
 import { ProjectVersion } from '@xmcl/modrinth'
 import { CurseForgeServiceKey, ModrinthServiceKey, Resource } from '@xmcl/runtime-api'
 import { InjectionKey } from 'vue'
+import { kMods } from './mods'
 import { useService } from './service'
+
+export interface ModProject {
+  icon?: string
+  name?: string
+}
 
 export interface ModListFileItem {
   id: string
   mutex: string
   name: string
 
+  projectName?: string
+  icon?: string
+
   curseforge?: File
   modrinth?: ProjectVersion
   resource?: Resource
 
-  dependencies: ModListFileLeaveItem[]
-  embedded: Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'>[]
-  incompatible: Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'>[]
-
   disabled: boolean
 }
 
-export type ModListFileLeaveItem = Omit<ModListFileItem, 'dependencies' | 'incompatible' | 'embedded'> & {
+export interface ModListFileItemParent extends ModListFileItem {
+  dependencies: ModListFileLeaveItem[]
+  embedded: ModListFileItem[]
+  incompatible: ModListFileItem[]
+}
+
+export type ModListFileLeaveItem = ModListFileItem & {
   type: 'required' | 'optional'
   parent: ModListFileItem
 }
@@ -28,18 +41,21 @@ export type ModListFileLeaveItem = Omit<ModListFileItem, 'dependencies' | 'incom
 export const kModInstallList = Symbol('ModInstallList') as InjectionKey<ReturnType<typeof useModInstallList>>
 
 export function useModInstallList() {
-  const list = ref([] as ModListFileItem[])
+  const list = ref([] as ModListFileItemParent[])
 
-  async function add(item: File | ProjectVersion | Resource, icon?: string) {
+  async function add(item: File | ProjectVersion | Resource, project?: ModProject) {
     const id = 'path' in item ? item.path : 'project_id' in item ? item.id : item.id.toString()
+    if (list.value.some(v => v.id === id)) return
     const name = 'path' in item ? item.fileName : 'project_id' in item ? item.name : item.displayName.toString()
     const curseforge = 'modId' in item ? item : undefined
     const modrinth = 'project_id' in item ? item : undefined
     const resource = 'path' in item ? item : undefined
-    const result: ModListFileItem = {
+    const result: ModListFileItemParent = {
       id,
       mutex: '',
       name,
+      icon: project?.icon,
+      projectName: project?.name,
 
       curseforge,
       modrinth,
@@ -47,24 +63,11 @@ export function useModInstallList() {
 
       disabled: false,
       dependencies: [],
+      embedded: [],
+      incompatible: [],
     }
     await refreshDependencies(result)
-    const previous = list.value
-    // const match = (a: ModListFileItem, b: ModListFileItem) => {
-    //   return false
-    // }
-    for (const i of previous) {
-      // if (!i.disabled && i.mutex === ) {
-      // }
-      // const incompatible = previous.filter(p => match(p, i)
-      //   && !(i.type === 'incompatible' && p.type === 'incompatible')
-      //   && !i.disabled && !p.disabled
-      // )
-      // i.incompatbile = incompatible
-      // for (const p of incompatible) {
-      //   p.incompatbile = [i]
-      // }
-    }
+    // const previous = list.value
     list.value.push(result)
   }
 
@@ -83,7 +86,7 @@ export function useModInstallList() {
   const { resolveFileDependencies: resolveCurseforge } = useService(CurseForgeServiceKey)
   const { resolveDependencies: resolveModrinth } = useService(ModrinthServiceKey)
 
-  async function refreshDependencies(parent: ModListFileItem) {
+  async function refreshDependencies(parent: ModListFileItemParent) {
     if (parent.curseforge) {
       const result = await resolveCurseforge(parent.curseforge)
       for (const [file, type] of result) {
@@ -94,15 +97,25 @@ export function useModInstallList() {
             : type === FileRelationType.Incompatible
               ? 'incompatible'
               : 'embedded'
-        parent.dependencies.push({
+        const item = {
           id: file.id.toString(),
           name: file.displayName,
           curseforge: file,
-          parent,
-          type: depType,
-          disabled: depType !== 'required',
+          disabled: false,
           mutex: '',
-        })
+        }
+        if (depType === 'embedded') {
+          parent.embedded.push(item)
+        } else if (depType === 'incompatible') {
+          parent.embedded.push(item)
+        } else {
+          parent.dependencies.push({
+            ...item,
+            parent,
+            type: depType,
+            disabled: depType !== 'required',
+          })
+        }
       }
     } else if (parent.modrinth) {
       const result = await resolveModrinth(parent.modrinth)
@@ -112,15 +125,29 @@ export function useModInstallList() {
         if (!dep) {
           continue
         }
-        parent.dependencies.push({
+        const item = {
           id: v.id.toString(),
           name: v.name,
           modrinth: v,
-          parent,
-          type: dep.dependency_type,
-          disabled: dep.dependency_type !== 'required',
+          disabled: false,
           mutex: '',
-        })
+        }
+        if (dep.dependency_type === 'embedded') {
+          parent.embedded.push(item)
+        } else if (dep.dependency_type === 'incompatible') {
+          parent.incompatible.push(item)
+        } else {
+          parent.dependencies.push({
+            ...item,
+            parent,
+            type: dep.dependency_type,
+            disabled: dep.dependency_type !== 'required',
+          })
+        }
+      }
+    } else if (parent.resource) {
+      const dependencies = (getModDependencies(parent.resource))
+      for (const [k, v] of Object.entries(dependencies)) {
       }
     }
   }
