@@ -2,7 +2,8 @@ import { checksum } from '@xmcl/core'
 import { isFileNoFound } from '@xmcl/runtime-api'
 import { AbortableTask, CancelledError } from '@xmcl/task'
 import { createHash } from 'crypto'
-import { access, constants, copy, copyFile, ensureDir, link, readdir, stat, symlink, unlink } from 'fs-extra'
+import { ensureDir } from 'fs-extra/esm'
+import { access, constants, copyFile, link, readdir, stat, symlink, unlink } from 'fs/promises'
 import { platform } from 'os'
 import { extname, join, resolve } from 'path'
 import { pipeline, Readable } from 'stream'
@@ -65,7 +66,7 @@ export async function copyPassively(src: string, dest: string, filter: (name: st
 }
 
 /**
- * This copy will not replace existed files.
+ * This link will not replace existed files.
  */
 export async function linkPassively(src: string, dest: string, filter: (name: string) => boolean = () => true) {
   const s = await stat(src).catch(() => { })
@@ -164,7 +165,7 @@ export function swapExt(path: string, ext: string) {
 }
 
 export function linkOrCopy(from: string, to: string) {
-  return link(from, to).catch(() => copy(from, to))
+  return link(from, to).catch(() => copyFile(from, to))
 }
 
 export function linkWithTimeout(from: string, to: string, timeout = 1500) {
@@ -176,7 +177,7 @@ export function linkWithTimeout(from: string, to: string, timeout = 1500) {
 
 export function linkWithTimeoutOrCopy(from: string, to: string, timeout = 1500) {
   return linkWithTimeout(from, to, timeout).catch(() => {
-    return copy(from, to)
+    return copyFile(from, to)
   })
 }
 
