@@ -1,21 +1,16 @@
 import type { APIApplication, OAuth2Scopes } from 'discord-api-types/v10'
-import { type FormatFunction, IPCTransport } from './transport/IPC'
-import { Dispatcher, request } from 'undici'
-import { WebSocketTransport } from './transport/WebSocket'
-import type { TypedEmitter } from './utils/TypedEmitter'
-import { ClientUser } from './structures/ClientUser'
-import { RPCError } from './utils/RPCError'
-import { EventEmitter } from 'node:events'
 import crypto from 'node:crypto'
+import { EventEmitter } from 'node:events'
+import { Dispatcher, request } from 'undici'
+import { ClientUser } from './structures/ClientUser'
 import {
-  type RPC_CMD,
-  type CommandIncoming,
-  type RPC_EVT,
+  CUSTOM_RPC_ERROR_CODE,
+  RPC_ERROR_CODE, type CommandIncoming, type RPC_CMD, type RPC_EVT,
   type Transport,
   type TransportOptions,
-  CUSTOM_RPC_ERROR_CODE,
-  RPC_ERROR_CODE,
 } from './structures/Transport'
+import { IPCTransport, type FormatFunction } from './transport/IPC'
+import { RPCError } from './utils/RPCError'
 
 export type AuthorizeOptions = {
   scopes: (OAuth2Scopes | `${OAuth2Scopes}`)[]
@@ -142,16 +137,10 @@ export class Client extends (EventEmitter) {
 
     this.pipeId = options.pipeId
 
-    this.transport =
-      options.transport && options.transport.type && options.transport.type !== 'ipc'
-        ? options.transport.type === 'websocket'
-          ? new WebSocketTransport({ client: this })
-          // eslint-disable-next-line new-cap
-          : new options.transport.type({ client: this })
-        : new IPCTransport({
-          client: this,
-          pathList: options.transport?.pathList,
-        })
+    this.transport = new IPCTransport({
+      client: this,
+      pathList: options.transport?.pathList,
+    })
 
     this.transport.on('message', (message) => {
       console.log(message)
@@ -190,7 +179,7 @@ export class Client extends (EventEmitter) {
     const url = new URL(`https://discord.com/api${path}`)
     const result = await request(url, {
       method,
-      query: req.query!,
+      query: req?.query,
       body: req?.data ?? undefined,
       headers: {
         ...(req?.headers ?? {}),
