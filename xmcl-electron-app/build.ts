@@ -240,6 +240,9 @@ async function start() {
         }
       },
     }, dir)
+    for (const c of Object.values(archContexts)) {
+      await unlink(join(c.distDir, 'target')).catch(() => undefined)
+    }
   }
 }
 

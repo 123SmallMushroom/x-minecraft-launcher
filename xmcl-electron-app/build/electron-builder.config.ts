@@ -70,11 +70,11 @@ export const config = {
     target: [
       {
         target: 'zip',
-        arch: 'x64' as ArchType,
+        arch: ['x64', 'arm64'],
       },
       {
         target: 'dmg',
-        arch: 'x64' as ArchType,
+        arch: ['x64', 'arm64'],
       },
     ],
   },

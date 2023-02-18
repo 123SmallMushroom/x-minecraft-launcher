@@ -76,14 +76,14 @@ jobs:
       with:
         name: mac-b${{ github.run_number }}-x64
         path: |
-          xmcl-electron-app/build/output/mac/X Minecraft Launcher.app/*.*
+          xmcl-electron-app/build/output/mac/*.*
     - name: Upload Mac arm64 Zip Build
       if: ${{ runner.os == 'macOS' }} 
       uses: actions/upload-artifact@v2
       with:
         name: mac-b${{ github.run_number }}-arm64
         path: |
-          xmcl-electron-app/build/output/mac-arm64/X Minecraft Launcher.app/*.*
+          xmcl-electron-app/build/output/mac-arm64/*.*
     - name: Prepare Windows Asar
       if: ${{ runner.os == 'Windows' && startsWith(github.event.head_commit.message, 'chore(release)') }} 
       run: |
