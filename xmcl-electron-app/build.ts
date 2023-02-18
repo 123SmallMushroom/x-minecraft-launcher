@@ -20,6 +20,7 @@ import pump from 'pump'
 import tfs from 'tar-fs'
 import { stream } from 'undici'
 import { createGunzip } from 'zlib'
+import { ensureFileSync } from 'fs-extra/esm'
 
 /**
  * @returns Hash string
@@ -211,7 +212,7 @@ async function start() {
               path.join(__dirname, 'icons', f),
               path.join(__dirname, 'build', 'appx', f.substring(f.indexOf('@') + 1)),
             ] as const)
-          await Promise.all(storeFiles.map(v => copyFile(v[0], v[1])))
+          await Promise.all(storeFiles.map(v => ensureFile(v[1]).then(() => copyFile(v[0], v[1]))))
         }
 
         const archContext = archContexts[Arch[context.arch!]]
