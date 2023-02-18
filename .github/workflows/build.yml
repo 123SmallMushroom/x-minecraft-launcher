@@ -2,8 +2,6 @@ name: Build
 
 on:
   push:
-    branches:
-      - master
     paths:
       - 'xmcl-runtime/**'
       - 'xmcl-runtime-api/**'
@@ -55,30 +53,37 @@ jobs:
       if: ${{ runner.os == 'Windows' }} 
       uses: actions/upload-artifact@v2
       with:
-        name: win-${{ github.run_number }}
+        name: win-b${{ github.run_number }}
         path: |
           xmcl-electron-app/build/output/win-unpacked/*.*
     - name: Upload Linux x64 Zip Build
       if: ${{ runner.os == 'Linux' }} 
       uses: actions/upload-artifact@v2
       with:
-        name: linux-${{ github.run_number }}-x64
+        name: linux-b${{ github.run_number }}-x64
         path: |
           xmcl-electron-app/build/output/linux-unpacked/*.*
     - name: Upload Linux arm64 Zip Build
       if: ${{ runner.os == 'Linux' }} 
       uses: actions/upload-artifact@v2
       with:
-        name: linux-${{ github.run_number }}-arm64
+        name: linux-b${{ github.run_number }}-arm64
         path: |
           xmcl-electron-app/build/output/linux-arm64-unpacked/*.*
     - name: Upload Mac x64 Zip Build
       if: ${{ runner.os == 'macOS' }} 
       uses: actions/upload-artifact@v2
       with:
-        name: mac-${{ github.run_number }}-x64
+        name: mac-b${{ github.run_number }}-x64
         path: |
-          xmcl-electron-app/build/output/X Minecraft Launcher.app/*.*
+          xmcl-electron-app/build/output/mac/X Minecraft Launcher.app/*.*
+    - name: Upload Mac arm64 Zip Build
+      if: ${{ runner.os == 'macOS' }} 
+      uses: actions/upload-artifact@v2
+      with:
+        name: mac-b${{ github.run_number }}-arm64
+        path: |
+          xmcl-electron-app/build/output/mac-arm64/X Minecraft Launcher.app/*.*
     - name: Prepare Windows Asar
       if: ${{ runner.os == 'Windows' && startsWith(github.event.head_commit.message, 'chore(release)') }} 
       run: |
