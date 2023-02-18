@@ -74,7 +74,7 @@ export const config = {
       },
       {
         target: 'dmg',
-        arch: ['x64', 'arm64'],
+        arch: ['x64'],
       },
     ],
   },
