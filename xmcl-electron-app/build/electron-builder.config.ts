@@ -27,6 +27,10 @@ export const config = {
   files: [{
     from: 'dist',
     to: '.',
+  }, {
+    from: '.',
+    to: '.',
+    filter: 'package.json',
   }],
   asarUnpack: [
     '**/*.node',
@@ -105,11 +109,11 @@ export const config = {
     icon: 'icons/dark@256x256.png',
     artifactName: 'xmcl-${version}-${arch}.${ext}',
     target: [
-        { target: 'AppImage', arch: ['x64', 'arm64'] },
-        { target: 'deb', arch: ['x64', 'arm64'] },
-        { target: 'rpm', arch: ['x64', 'arm64'] },
-        { target: 'tar.xz', arch: ['x64', 'arm64'] },
-      ],
+      { target: 'AppImage', arch: ['x64', 'arm64'] },
+      { target: 'deb', arch: ['x64', 'arm64'] },
+      { target: 'rpm', arch: ['x64', 'arm64'] },
+      { target: 'tar.xz', arch: ['x64', 'arm64'] },
+    ],
   },
   snap: {
     publish: [

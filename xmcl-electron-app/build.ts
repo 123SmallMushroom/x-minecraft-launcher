@@ -201,15 +201,17 @@ async function start() {
         await asar.createPackage(distDir, asarFile)
       },
       async artifactBuildStarted(context) {
-        const files = await readdir(path.join(__dirname, './icons'))
-        const storeFiles = files.filter(f => f.endsWith('.png') &&
-        !f.endsWith('256x256.png') &&
-        !f.endsWith('tray.png'))
-          .map((f) => [
-            path.join(__dirname, 'icons', f),
-            path.join(__dirname, 'build', 'appx', f.substring(f.indexOf('@') + 1)),
-          ] as const)
-        await Promise.all(storeFiles.map(v => copyFile(v[0], v[1])))
+        if (context.targetPresentableName.toLowerCase() === 'appx') {
+          const files = await readdir(path.join(__dirname, './icons'))
+          const storeFiles = files.filter(f => f.endsWith('.png') &&
+          !f.endsWith('256x256.png') &&
+          !f.endsWith('tray.png'))
+            .map((f) => [
+              path.join(__dirname, 'icons', f),
+              path.join(__dirname, 'build', 'appx', f.substring(f.indexOf('@') + 1)),
+            ] as const)
+          await Promise.all(storeFiles.map(v => copyFile(v[0], v[1])))
+        }
 
         const archContext = archContexts[Arch[context.arch!]]
         if (archContext.targetsToWait > 0 && lastBuildTarget.includes(context.targetPresentableName)) {
