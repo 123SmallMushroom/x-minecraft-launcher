@@ -1,5 +1,6 @@
-import { Configuration, TargetConfiguration } from 'electron-builder'
+/* eslint-disable no-template-curly-in-string */
 import { config as dotenv } from 'dotenv'
+import { Configuration, TargetConfiguration } from 'electron-builder'
 
 dotenv()
 
@@ -23,22 +24,16 @@ export const config = {
     owner: 'voxelum',
     repo: 'x-minecraft-launcher',
   }],
-  files: [
-    'dist/**/*',
-  ],
+  files: [{
+    from: 'dist',
+    to: '.',
+  }],
   asarUnpack: [
-    '**/assets/**/*.cs',
-    '**/assets/**/*.node',
-    '**/assets/**/*.lib',
-    '**/assets/**/*.so',
-    '**/assets/**/*.dll',
-    '**/assets/**/*.vbs',
+    '**/*.node',
     '**/*.worker.js',
   ],
-  // eslint-disable-next-line no-template-curly-in-string
   artifactName: 'xmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
-    // eslint-disable-next-line no-template-curly-in-string
     artifactName: 'xmcl-${version}.${ext}',
     displayName: 'X Minecraft Launcher',
     applicationId: 'CI010.XMCL',
@@ -50,7 +45,6 @@ export const config = {
     languages: ['en-US', 'zh-CN', 'ru'],
   },
   dmg: {
-    // eslint-disable-next-line no-template-curly-in-string
     artifactName: 'xmcl-${version}.${ext}',
     contents: [
       {
@@ -87,26 +81,20 @@ export const config = {
       filter: '*.dll',
     },
     certificateFile: undefined as string | undefined,
-    artifactName: process.env.BUILD_TARGET === 'appx'
-      // eslint-disable-next-line no-template-curly-in-string
-      ? 'xmcl-${version}.${ext}'
-      // eslint-disable-next-line no-template-curly-in-string
-      : 'xmcl-${version}-${platform}-${arch}.${ext}',
     icon: 'icons/dark.ico',
     files: [
       '**/*.cs',
       '**/*.worker.js',
     ],
     target: [
-      process.env.BUILD_TARGET === 'appx'
-        ? 'appx'
-        : {
-          target: 'zip',
-          arch: [
-            'x64',
-            'ia32',
-          ],
-        },
+      'appx',
+      {
+        target: 'zip',
+        arch: [
+          'x64',
+          'ia32',
+        ],
+      },
     ],
   },
   linux: {
@@ -115,15 +103,12 @@ export const config = {
     },
     category: 'Game',
     icon: 'icons/dark@256x256.png',
-    // eslint-disable-next-line no-template-curly-in-string
     artifactName: 'xmcl-${version}-${arch}.${ext}',
-    target: process.env.BUILD_TARGET === 'appimage'
-      ? [{ target: 'AppImage', arch: 'x64' as ArchType }]
-      : [
-        { target: 'deb', arch: 'x64' as ArchType },
-        { target: 'rpm', arch: 'x64' as ArchType },
-        { target: 'zip', arch: 'x64' as ArchType },
-        { target: 'tar.xz', arch: 'x64' as ArchType },
+    target: [
+        { target: 'AppImage', arch: ['x64', 'arm64'] },
+        { target: 'deb', arch: ['x64', 'arm64'] },
+        { target: 'rpm', arch: ['x64', 'arm64'] },
+        { target: 'tar.xz', arch: ['x64', 'arm64'] },
       ],
   },
   snap: {
